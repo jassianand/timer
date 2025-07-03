@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Countdown Timer</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#f2f2f2" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    .timer {
+      font-size: 4rem;
+      margin: 20px;
+    }
+    .controls input,
+    .controls button {
+      font-size: 1.2rem;
+      margin: 5px;
+      padding: 10px 20px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Countdown Timer</h1>
+  <div class="timer" id="timer">00:00:00</div>
+  <div class="controls">
+    <input type="number" id="minutesInput" placeholder="Minutes" min="0" />
+    <button onclick="startCountdown()">Start</button>
+    <button onclick="pauseCountdown()">Pause</button>
+    <button onclick="resetCountdown()">Reset</button>
+  </div>
+
+  <script>
+    let totalSeconds = 0;
+    let countdownInterval = null;
+
+    function updateTimer() {
+      let hrs = Math.floor(totalSeconds / 3600);
+      let mins = Math.floor((totalSeconds % 3600) / 60);
+      let secs = totalSeconds % 60;
+
+      document.getElementById('timer').textContent =
+        \`\${hrs.toString().padStart(2, '0')}:\${mins.toString().padStart(2, '0')}:\${secs.toString().padStart(2, '0')}\`;
+    }
+
+    function startCountdown() {
+      if (countdownInterval) return;
+      const minutes = parseInt(document.getElementById('minutesInput').value);
+      if (!isNaN(minutes) && totalSeconds === 0) {
+        totalSeconds = minutes * 60;
+      }
+      if (totalSeconds > 0) {
+        countdownInterval = setInterval(() => {
+          totalSeconds--;
+          updateTimer();
+          if (totalSeconds <= 0) {
+            clearInterval(countdownInterval);
+            countdownInterval = null;
+            alert("Time's up!");
+          }
+        }, 1000);
+      }
+    }
+
+    function pauseCountdown() {
+      clearInterval(countdownInterval);
+      countdownInterval = null;
+    }
+
+    function resetCountdown() {
+      pauseCountdown();
+      totalSeconds = 0;
+      updateTimer();
+      document.getElementById('minutesInput').value = '';
+    }
+
+    updateTimer();
+
+    // Register service worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(() => console.log('Service Worker Registered'))
+        .catch(error => console.error('Service Worker Registration Failed:', error));
+    }
+  </script>
+</body>
+</html>
